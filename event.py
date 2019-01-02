@@ -1,4 +1,3 @@
-
 class Event(object):
   # コマの定義
   SHIFT_BOXES = [
