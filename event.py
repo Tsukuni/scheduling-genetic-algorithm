@@ -1,16 +1,8 @@
-class Event(object):
-  # コマの定義
-  SHIFT_BOXES = [
-    'day1_1', 'day1_2', 'day1_3',
-    'day2_1', 'day2_2', 'day2_3',
-    'day3_1', 'day3_2', 'day3_3']
-  
-  # 各コマの想定人数
-  NEED_PEOPLE = [
-    1,1,1,
-    1,1,1,
-    1,1,1]
+import random
+from setting import EVENT_BOXES
+from setting import NEED_PEOPLE
 
+class Event(object):
   def __init__(self, list):
     if list == None:
       self.make_sample()
@@ -55,7 +47,7 @@ class Event(object):
     index = 0
     for e in line:
       if e == 1:
-        result.append(self.SHIFT_BOXES[index])
+        result.append(EVENT_BOXES[index])
       index = index + 1
     return result
 
@@ -71,14 +63,14 @@ class Event(object):
 
   # コマ名を指定してアサインされているユーザ番号リストを取得する
   def get_user_nos_by_box_name(self, box_name):
-    box_index = self.SHIFT_BOXES.index(box_name)
+    box_index = EVENT_BOXES.index(box_name)
     return self.get_user_nos_by_box_index(box_index)
 
   # 想定人数と実際の人数の差分を取得する
   def abs_people_between_need_and_actual(self):
     result = []
     index = 0
-    for need in self.NEED_PEOPLE:
+    for need in NEED_PEOPLE:
       actual = len(self.get_user_nos_by_box_index(index))
       result.append(abs(need - actual))
       index += 1
@@ -87,7 +79,7 @@ class Event(object):
   # 参加不可能時間に出演することになっているバンド数を取得
   def not_applicated_assign(self):
     count = 0
-    for box_name in self.SHIFT_BOXES:
+    for box_name in EVENT_BOXES:
       user_nos = self.get_user_nos_by_box_name(box_name)
       for user_no in user_nos:
         e = self.organizations[user_no]
@@ -99,7 +91,7 @@ class Event(object):
   def only_one_organization_assign(self):
     count = 0
     index = 0
-    for box_name in self.SHIFT_BOXES:
+    for box_name in EVENT_BOXES:
       if sum(self.slice()[index]) == 1:
         count += 1
       index += 1
@@ -109,7 +101,7 @@ class Event(object):
   def applicated_order_count(self):
     shift_box_sum = 0
     count = 0
-    for box_name in self.SHIFT_BOXES:
+    for box_name in EVENT_BOXES:
       user_nos = self.get_user_nos_by_box_name(box_name)
       box_order = int(box_name.split('_')[1])
       for user_no in user_nos:

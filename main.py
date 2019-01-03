@@ -9,31 +9,23 @@ from deap import cma
 
 from organization import Organization
 from event import Event
+from setting import organization_info, people_count_sub_sum_weight, not_applicated_count_weight, not_one_assigned_count_weight, applicated_order_count_weight
 
-# 団体定義
-e0 = Organization(0, "どこでもOKな人", 10, [])
+def setOrganization(line):
+  result = []
+  for data in line:
+    data = data.split(',')
+    box_no = int(data.pop(0))
+    name = data.pop(0)
+    career = int(data.pop(0))
+    impossible_time = data
+    result.append(Organization(box_no, name, career, impossible_time))
+  return result
 
-e1 = Organization(1, "最初ダメな人", 11, ['day1_1','day2_1','day3_1'])
+organizations = setOrganization(organization_info)
 
-e2 = Organization(2, "真ん中ダメな人", 12, ['day1_2','day2_2','day3_2'])
-
-e3 = Organization(3, "最後ダメな人", 2, ['day3_1','day3_1','day3_1'])
-
-e4 = Organization(4, "どこでもOKな人", 1,[])
-
-e5 = Organization(5, "1日目の最後だけダメな人", 3,['day1_3'])
-
-e6 = Organization(6, "2日目の真ん中ダメな人", 4,['day2_2'])
-
-e7 = Organization(7, "3日目の最初ダメな人", 2, ['day3_1'])
-
-e8 = Organization(8, "1日目の最初しかいけない人", 2, ['day1_2','day1_3',
-['day2_1','day2_2','day2_3'],
-['day3 _1','day3_2','day3_3']])
-
-organizations = [e0, e1, e2, e3, e4, e5, e6, e7, e8]
-
-creator.create("FitnessPeopleCount", base.Fitness, weights=(-100.0, -100.0, -100.0, -10.0))
+creator.create("FitnessPeopleCount", base.Fitness, weights=(not_applicated_count_weight, people_count_sub_sum_weight,
+  not_one_assigned_count_weight, applicated_order_count_weight))
 creator.create("Individual", list, fitness=creator.FitnessPeopleCount)
 
 toolbox = base.Toolbox()
