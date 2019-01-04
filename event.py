@@ -1,5 +1,5 @@
 import random
-from setting import EVENT_BOXES, NEED_PEOPLE, input_path
+from setting import EVENT_BOXES, NEED_PEOPLE, input_path, organization_info
 
 class Event(object):
   def __init__(self, list):
@@ -12,7 +12,7 @@ class Event(object):
   # ランダムなデータを生成
   def make_sample(self):
     sample_list = []
-    for num in range(81):
+    for num in range(len(EVENT_BOXES) * len(input_path)):
       sample_list.append(random.randint(0, 1))
     self.list = tuple(sample_list)
 
@@ -20,9 +20,10 @@ class Event(object):
   def slice(self):
     sliced = []
     start = 0
-    for num in range(9):
-      sliced.append(self.list[start:(start + 9)])
-      start = start + 9
+    event_len = len(EVENT_BOXES)
+    for num in range(event_len):
+      sliced.append(self.list[start:(start + event_len)])
+      start = start + event_len
     return tuple(sliced)
   
   def print_csv(self):

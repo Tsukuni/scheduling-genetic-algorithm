@@ -5,7 +5,7 @@ from deap import creator, base, tools, algorithms
 
 from organization import Organization
 from event import Event
-from setting import organization_info, people_count_sub_sum_weight, not_applicated_count_weight, not_one_assigned_count_weight, applicated_order_count_weight
+from setting import EVENT_BOXES, organization_info, people_count_sub_sum_weight, not_applicated_count_weight, not_one_assigned_count_weight, applicated_order_count_weight
 
 def setOrganization(line):
   result = []
@@ -29,19 +29,21 @@ toolbox = base.Toolbox()
 toolbox.register("map", futures.map)
 
 toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 81)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, len(EVENT_BOXES) * len(organization_info))
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalEvent(individual):
   s = Event(individual)
   s.organizations = organizations
+  event_len = len(EVENT_BOXES)
+  organizations_number = len(organizations) * event_len
 
   # 想定人数とアサイン人数の差
-  people_count_sub_sum = sum(s.abs_people_between_need_and_actual()) / 81.0
+  people_count_sub_sum = sum(s.abs_people_between_need_and_actual()) / organizations_number
   # 応募していない時間帯へのアサイン数
-  not_applicated_count = s.not_applicated_assign() / 81.0
+  not_applicated_count = s.not_applicated_assign() / organizations_number
   # 一つの枠にひとバンドか数える
-  not_one_assigned_count = (9.0 - s.only_one_organization_assign()) / 9.0
+  not_one_assigned_count = (event_len - s.only_one_organization_assign()) / event_len
   # キャリアの長い人を後半へ持ってくる
   applicated_order_count = s.applicated_order_count()
   return (not_applicated_count, people_count_sub_sum, not_one_assigned_count, applicated_order_count)
