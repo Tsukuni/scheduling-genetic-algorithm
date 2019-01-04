@@ -1,6 +1,5 @@
 import random
-from setting import EVENT_BOXES
-from setting import NEED_PEOPLE
+from setting import EVENT_BOXES, NEED_PEOPLE, input_path
 
 class Event(object):
   def __init__(self, list):
@@ -34,7 +33,6 @@ class Event(object):
   def print_tsv(self):
     for line in self.slice():
       print("\t".join(map(str, line)))
-
 
   # ユーザ番号を指定してコマ名を取得する
   def get_boxes_by_user(self, user_no):
@@ -112,3 +110,12 @@ class Event(object):
           shift_box_sum += career
         count += abs(career - box_order)
     return (count / shift_box_sum)
+
+  # 結果出力
+  def out_put_result(self,value):
+    f = open('output/' + input_path, 'w')
+    f.write(str(value)+ '\n')
+    for line in self.slice():
+      f.write(str(("\t".join(map(str, line)))))
+      f.write('\n')
+    f.close()

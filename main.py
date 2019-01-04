@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 from scoop import futures
-
-from deap import base
-from deap import creator
-from deap import tools
-from deap import cma
+from deap import creator, base, tools, algorithms
 
 from organization import Organization
 from event import Event
@@ -63,7 +59,7 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 if __name__ == '__main__':
     # 初期集団を生成する
     pop = toolbox.population(n=300)
-    CXPB, MUTPB, NGEN = 0.6, 0.05, 1000 # 交差確率、突然変異確率、進化計算のループ回数
+    CXPB, MUTPB, NGEN = 0.6, 0.05, 10 # 交差確率、突然変異確率、進化計算のループ回数
 
     print("進化開始")
 
@@ -136,3 +132,4 @@ if __name__ == '__main__':
     s = Event(best_ind)
     s.print_csv()
     s.print_tsv()
+    s.out_put_result(best_ind.fitness.values)
