@@ -1,9 +1,3 @@
-from shape_input import shape
-
-# テストデータのpath
-input_path = 'sample1.txt'
-
-
 # 重みを設定
 # 想定人数とアサイン人数の差
 people_count_sub_sum_weight = -100
@@ -12,6 +6,4 @@ not_applicated_count_weight = -100
 # 一つの枠にひとバンドか数える
 not_one_assigned_count_weight = -100
 # キャリアの長い人を後半へ持ってくる
-applicated_order_count_weight = -10
-
-EVENT_BOXES, NEED_PEOPLE, organization_info = shape(input_path)
+applicated_order_count_weight = -50

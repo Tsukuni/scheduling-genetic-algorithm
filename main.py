@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 from scoop import futures
 from deap import creator, base, tools, algorithms
 
 from organization import Organization
 from event import Event
-from setting import EVENT_BOXES, organization_info, people_count_sub_sum_weight, not_applicated_count_weight, not_one_assigned_count_weight, applicated_order_count_weight
+from setting import people_count_sub_sum_weight, not_applicated_count_weight, not_one_assigned_count_weight, applicated_order_count_weight
+from shape_input import shape
 
 def setOrganization(line):
   result = []
@@ -18,22 +20,8 @@ def setOrganization(line):
     result.append(Organization(box_no, name, career, impossible_time))
   return result
 
-organizations = setOrganization(organization_info)
-
-creator.create("FitnessPeopleCount", base.Fitness, weights=(not_applicated_count_weight, people_count_sub_sum_weight,
-  not_one_assigned_count_weight, applicated_order_count_weight))
-creator.create("Individual", list, fitness=creator.FitnessPeopleCount)
-
-toolbox = base.Toolbox()
-
-toolbox.register("map", futures.map)
-
-toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, len(EVENT_BOXES) * len(organization_info))
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
 def evalEvent(individual):
-  s = Event(individual)
+  s = Event(individual, EVENT_BOXES, NEED_PEOPLE, input_path, organization_info)
   s.organizations = organizations
   event_len = len(EVENT_BOXES)
   organizations_number = len(organizations) * event_len
@@ -45,36 +33,58 @@ def evalEvent(individual):
   # 一つの枠にひとバンドか数える
   not_one_assigned_count = (event_len - s.only_one_organization_assign()) / event_len
   # キャリアの長い人を後半へ持ってくる
-  applicated_order_count = s.applicated_order_count()
-  return (not_applicated_count, people_count_sub_sum, not_one_assigned_count, applicated_order_count)
-
-toolbox.register("evaluate", evalEvent)
-# 交叉関数を定義(二点交叉)
-toolbox.register("mate", tools.cxTwoPoint)
-
-# 変異関数を定義(ビット反転、変異隔離が5%ということ?)
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
-
-# 選択関数を定義(トーナメント選択、tournsizeはトーナメントの数？)
-toolbox.register("select", tools.selTournament, tournsize=3)
+  #applicated_order_count = s.applicated_order_count()
+  return (not_applicated_count, people_count_sub_sum, not_one_assigned_count)
 
 if __name__ == '__main__':
+  input_no = 12
+  for i in range(4):
+    start = time.time()
+    input_path = 'sample' + str(input_no) + '.txt'
+    EVENT_BOXES, NEED_PEOPLE, organization_info = shape(input_path)
+
+    organizations = setOrganization(organization_info)
+
+    creator.create("FitnessPeopleCount", base.Fitness, weights=(not_applicated_count_weight, people_count_sub_sum_weight,
+      not_one_assigned_count_weight))
+    creator.create("Individual", list, fitness=creator.FitnessPeopleCount)
+
+    toolbox = base.Toolbox()
+
+    toolbox.register("map", futures.map)
+
+    toolbox.register("attr_bool", random.randint, 0, 1)
+    toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, len(EVENT_BOXES) * len(organization_info))
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    toolbox.register("evaluate", evalEvent)
+    # 交叉関数を定義(二点交叉)
+    toolbox.register("mate", tools.cxTwoPoint)
+
+    # 変異関数を定義(ビット反転、変異隔離が5%ということ?)
+    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+
+    # 選択関数を定義(トーナメント選択、tournsizeはトーナメントの数？)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+
     # 初期集団を生成する
     pop = toolbox.population(n=300)
-    CXPB, MUTPB, NGEN = 0.6, 0.05, 10 # 交差確率、突然変異確率、進化計算のループ回数
+    CXPB, MUTPB, NGEN = 0.6, 0.3, 10000000000 # 交差確率、突然変異確率、進化計算のループ回数
 
     print("進化開始")
 
     # 初期集団の個体を評価する
     fitnesses = list(map(toolbox.evaluate, pop))
+    flag = 0
     for ind, fit in zip(pop, fitnesses):  # zipは複数変数の同時ループ
         # 適合性をセットする
         ind.fitness.values = fit
 
     print(" %i の個体を評価" % len(pop))
 
-     # 進化計算開始
+      # 進化計算開始
     for g in range(NGEN):
+      if (time.time() - start) < 901 :
         print("-- %i 世代 --" % g)
 
         # 選択
@@ -112,6 +122,7 @@ if __name__ == '__main__':
 
         # すべての個体の適合度を配列にする
         index = 1
+        print("sample" + str(input_no))
         for v in ind.fitness.values:
           fits = [v for ind in pop]
 
@@ -119,19 +130,27 @@ if __name__ == '__main__':
           mean = sum(fits) / length
           sum2 = sum(x*x for x in fits)
           std = abs(sum2 / length - mean**2)**0.5
-
           print("* パラメータ%d" % index)
           print("  Min %s" % min(fits))
           print("  Max %s" % max(fits))
           print("  Avg %s" % mean)
           print("  Std %s" % std)
           index += 1
+          if sum(ind.fitness.values) == 0:
+            flag = 1
+            break
+        if flag == 1:
+          break
+      else:
+        break
 
     print("-- 進化終了 --")
 
     best_ind = tools.selBest(pop, 1)[0]
     print("最も優れていた個体: %s, %s" % (best_ind, best_ind.fitness.values))
-    s = Event(best_ind)
+    s = Event(best_ind, EVENT_BOXES, NEED_PEOPLE, input_path, organization_info)
     s.print_csv()
     s.print_tsv()
-    s.out_put_result(best_ind.fitness.values)
+    elapsed_time = time.time() - start
+    s.out_put_result(best_ind.fitness.values, elapsed_time)
+    input_no += 1
