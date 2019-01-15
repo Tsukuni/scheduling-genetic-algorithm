@@ -116,8 +116,8 @@ class Event(object):
     return (count / shift_box_sum)
 
   # 結果出力
-  def out_put_result(self, value, time):
-    f = open('output/' + self.input_path, 'w')
+  def out_put_result(self, value, time, no):
+    f = open('output3-'+ str(no) + '/' + self.input_path, 'w')
     f.write(str(value)+ '\n')
     f.write(str(time)+'秒'+'\n')
     for line in self.slice():
