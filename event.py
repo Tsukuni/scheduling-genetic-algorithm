@@ -1,4 +1,5 @@
 import random
+import os
 
 class Event(object):
   def __init__(self, list, event_boxes, need_people, input_path, organization_info):
@@ -116,8 +117,11 @@ class Event(object):
     return (count / shift_box_sum)
 
   # 結果出力
-  def out_put_result(self, value, time, no):
-    f = open('output3-'+ str(no) + '/' + self.input_path, 'w')
+  def out_put_result(self, value, time, cross_rate, mutation_rate):
+    output_path = 'reuslt/output-' + str(cross_rate) + '-' + str(mutation_rate)
+    if not os.path.exists(output_path):
+      os.mkdir(output_path)
+    f = open(output_path + '/' + self.input_path, 'w')
     f.write(str(value)+ '\n')
     f.write(str(time)+'秒'+'\n')
     for line in self.slice():

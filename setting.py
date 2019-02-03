@@ -6,4 +6,4 @@ not_applicated_count_weight = -100
 # 一つの枠にひとバンドか数える
 not_one_assigned_count_weight = -100
 # キャリアの長い人を後半へ持ってくる
-applicated_order_count_weight = -50
+applicated_order_count_weight = 1
